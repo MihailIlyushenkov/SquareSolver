@@ -11,11 +11,11 @@ int main(void)
     if (fabs(a) < 000000.1)
         printf("this is not square equasion");
     else if (discr > 0)
-        printf("решения это %f and %f", ((-b)+sqrt(discr))/(2*a), ((-b)-sqrt(discr))/(2*a));
+        printf("solutions are %f and %f", ((-b)+sqrt(discr))/(2*a), ((-b)-sqrt(discr))/(2*a));
     else if (discr == 0)
-        printf("решение это %f", (-b)/(2*a));
+        printf("solution is %f", (-b)/(2*a));
     else
-        printf("решения это %f+%f and %f-%f", (-b)/(2.0*a), sqrt(fabs(discr))/(2.0*a), (-b)/(2.0*a),  sqrt(fabs(discr))/(2.0*a));
+        printf("solutions are %f+%f and %f-%f", (-b)/(2.0*a), sqrt(fabs(discr))/(2.0*a), (-b)/(2.0*a),  sqrt(fabs(discr))/(2.0*a));
 
     return 0;
 }
