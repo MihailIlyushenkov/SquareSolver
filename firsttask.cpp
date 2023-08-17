@@ -1,19 +1,21 @@
 #include <stdio.h>
 #include <math.h>
-#include <TXLib.h>
 
 int main(void)
 {
     float a, b, c, discr;
+    printf("enter a, b, c is ax^2 + bx + c equasion\n");
     scanf("%f%f%f", &a, &b, &c);
 
     discr = pow(b, 2) - 4.0*(a*c);
-    if (discr > 0)
+    if (fabs(a) < 000000.1)
+        printf("this is not square equasion");
+    else if (discr > 0)
         printf("решения это %f and %f", ((-b)+sqrt(discr))/(2*a), ((-b)-sqrt(discr))/(2*a));
     else if (discr == 0)
         printf("решение это %f", (-b)/(2*a));
     else
-        printf("нет действительных решений");
+        printf("решения это %f+%f and %f-%f", (-b)/(2.0*a), sqrt(fabs(discr))/(2.0*a), (-b)/(2.0*a),  sqrt(fabs(discr))/(2.0*a));
 
     return 0;
 }
