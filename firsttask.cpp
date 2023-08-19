@@ -2,12 +2,22 @@
 #include <math.h>
 
 void cleaner(void);
+void input(void);
+void output(void);
+
+double a, b, c;
 
 int main(void)
 {
-    const double EPS = 00000000.1;
-    double a, b, c, discr, value1_1, value1_2, value2_1, value2_2;
+    input();
+    output();
+    return 0;
+}
+
+void input(void)
+{
     int counter = 0;
+
     printf("enter a, b, c in ax^2 + bx + c equation separated by a space\n");
 
     while (counter != 3)
@@ -19,15 +29,43 @@ int main(void)
             printf("wrong input format, try again\n");
         }
     }
+}
 
+
+void cleaner(void)
+{
+    int c = getchar();
+    while ((c != '\n') && (c != EOF))
+    {
+        c = getchar();
+    }
+}
+
+void output(void)
+{
+    const double EPS = 1e-15;
+    double discr, value1_1, value1_2, value2_1, value2_2;
 
     discr = pow(b, 2) - 4.0*(a*c);
 
     if (fabs(a) < EPS)
     {
-        printf("%.4lf", (-c)/b);
+        if (fabs(b) < EPS)
+        {
+            if (fabs(c) < EPS)
+            {
+                printf("infitely many solutions");
+            }
+            else
+            {
+                printf("no solutions");
+            }
+        }
+        else
+        {
+            printf("%.4lf", (-c)/b);
+        }
     }
-
     else
     {
         if (discr >= EPS)
@@ -49,17 +87,4 @@ int main(void)
             }
         }
     }
-
-    return 0;
-}
-
-
-void cleaner(void)
-{
-    int c;
-    c = getchar();
-    while ((c != '\n') && (c != EOF))
-        {
-            c = getchar();
-        }
 }
