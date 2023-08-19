@@ -24,13 +24,13 @@ int main(void)
 
     discr = pow(b, 2) - 4.0*(a*c);
     if (fabs(a) < 000000.1)
-        printf("this is not square equation");
+        printf("this is not square equation (a can't be 0)");
     else if (discr > 0)
-        printf("solutions are %f and %f", ((-b)+sqrt(discr))/(2*a), ((-b)-sqrt(discr))/(2*a));
+        printf("solutions are %.3f and %.3f", ((-b)+sqrt(discr))/(2*a), ((-b)-sqrt(discr))/(2*a));
     else if (discr == 0)
-        printf("solution is %f", (-b)/(2*a));
+        printf("solution is %.3f", (-b)/(2*a));
     else
-        printf("solutions are %f+%f and %f-%f", (-b)/(2.0*a), sqrt(fabs(discr))/(2.0*a), (-b)/(2.0*a),  sqrt(fabs(discr))/(2.0*a));
+        printf("solutions are %.3f+%.3fi and %.3f-%.3fi", (-b)/(2.0*a), sqrt(fabs(discr))/(2.0*a), (-b)/(2.0*a),  sqrt(fabs(discr))/(2.0*a));
 
     return 0;
 }
