@@ -3,16 +3,16 @@
 
 void cleaner(void);
 
-
 int main(void)
 {
-    float a, b, c, discr;
+    const double EPS = 00000000.1;
+    double a, b, c, discr, value1_1, value1_2, value2_1, value2_2;
     int counter = 0;
     printf("enter a, b, c in ax^2 + bx + c equation separated by a space\n");
 
     while (counter != 3)
     {
-        counter = scanf("%f%f%f", &a, &b, &c);
+        counter = scanf("%lf%lf%lf", &a, &b, &c);
         cleaner();
         if (counter != 3)
         {
@@ -20,17 +20,35 @@ int main(void)
         }
     }
 
-    /* printf("%f %f %f", a, b, c); */
 
     discr = pow(b, 2) - 4.0*(a*c);
-    if (fabs(a) < 000000.1)
-        printf("this is not square equation (a can't be 0)");
-    else if (discr > 0)
-        printf("solutions are %.3f and %.3f", ((-b)+sqrt(discr))/(2*a), ((-b)-sqrt(discr))/(2*a));
-    else if (discr == 0)
-        printf("solution is %.3f", (-b)/(2*a));
+
+    if (fabs(a) < EPS)
+    {
+        printf("%.4lf", (-c)/b);
+    }
+
     else
-        printf("solutions are %.3f+%.3fi and %.3f-%.3fi", (-b)/(2.0*a), sqrt(fabs(discr))/(2.0*a), (-b)/(2.0*a),  sqrt(fabs(discr))/(2.0*a));
+    {
+        if (discr >= EPS)
+        {
+            value1_1 = ((-b)+sqrt(discr))/(2.0*a);
+            value1_2 = ((-b)-sqrt(discr))/(2.0*a);
+            printf("solutions are %.4lf and %.4lf", value1_1, value1_2);
+        }
+        else
+        {
+            if (fabs(discr) < EPS)
+            printf("solution is %.4lf", (-b)/(2*a));
+
+            else
+            {
+                value2_1 = (-b)/(2.0*a);
+                value2_2 = sqrt(fabs(discr))/(2.0*a);
+                printf("solutions are %.4lf+%.4lfi and %.4lf-%.4lfi", value2_1, value2_2, value2_1, value2_2);
+            }
+        }
+    }
 
     return 0;
 }
