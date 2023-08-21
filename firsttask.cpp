@@ -2,35 +2,87 @@
 #include <math.h>
 
 void cleaner(void);
-void input(void);
-void output(void);
-
-double a, b, c;
+void input(double *a, double *b, double *c);
+void solver(double a, double b, double c, int *ptr, double *res0_ip, double *res1_ip);
+void output(double *res0_ip, double *res1_ip, int *ptr_ip);
 
 int main(void)
 {
-    input();
-    output();
+    double a, b, c, res0, res1;
+    int ptr;
+
+    input(&a, &b, &c);
+    solver(a, b, c, &ptr, &res0, &res1);
+    output(&res0, &res1, &ptr);
     return 0;
 }
 
-void input(void)
+void input(double *a_ip, double *b_ip, double *c_ip)
 {
     int counter = 0;
-
     printf("enter a, b, c in ax^2 + bx + c equation separated by a space\n");
 
     while (counter != 3)
     {
-        counter = scanf("%lf%lf%lf", &a, &b, &c);
+        counter = scanf("%lf%lf%lf", a_ip, b_ip, c_ip);
         cleaner();
         if (counter != 3)
         {
             printf("wrong input format, try again\n");
         }
     }
+
 }
 
+void solver(double a, double b, double c, int *ptr_ip, double *res0_ip, double *res1_ip)
+{
+    const double EPS = 1e-15;
+    double discr;
+
+    if (fabs(a) < EPS)
+    {
+        if (fabs(b) < EPS)
+        {
+            if (fabs(c) < EPS)
+            {
+                *ptr_ip = -3;
+                return;
+            }
+            else
+            {
+                *ptr_ip = -2;
+                return;
+            }
+        }
+        else
+        {
+            *ptr_ip = -1;
+            *res0_ip = (-c)/b;
+            return void();
+        }
+    }
+
+    discr = pow(b, 2) - 4.0*(a*c);
+    *res0_ip = (-b)/(2.0*a);
+    *res1_ip = sqrt(fabs(discr))/(2.0*a);
+
+    if (discr > EPS)
+    {
+        *ptr_ip = 0;
+    }
+    else
+    {
+        if (fabs(discr) < EPS)
+        {
+            *ptr_ip = 1;
+        }
+        else
+        {
+            *ptr_ip = 2;
+        }
+    }
+
+}
 
 void cleaner(void)
 {
@@ -41,50 +93,15 @@ void cleaner(void)
     }
 }
 
-void output(void)
+void output(double *res0_ip, double *res1_ip, int *ptr_ip)
 {
-    const double EPS = 1e-15;
-    double discr, value1_1, value1_2, value2_1, value2_2;
-
-    discr = pow(b, 2) - 4.0*(a*c);
-
-    if (fabs(a) < EPS)
+    switch(*ptr_ip)
     {
-        if (fabs(b) < EPS)
-        {
-            if (fabs(c) < EPS)
-            {
-                printf("infitely many solutions");
-            }
-            else
-            {
-                printf("no solutions");
-            }
-        }
-        else
-        {
-            printf("%.4lf", (-c)/b);
-        }
-    }
-    else
-    {
-        if (discr >= EPS)
-        {
-            value1_1 = ((-b)+sqrt(discr))/(2.0*a);
-            value1_2 = ((-b)-sqrt(discr))/(2.0*a);
-            printf("solutions are %.4lf and %.4lf", value1_1, value1_2);
-        }
-        else
-        {
-            if (fabs(discr) < EPS)
-            printf("solution is %.4lf", (-b)/(2*a));
-
-            else
-            {
-                value2_1 = (-b)/(2.0*a);
-                value2_2 = sqrt(fabs(discr))/(2.0*a);
-                printf("solutions are %.4lf+%.4lfi and %.4lf-%.4lfi", value2_1, value2_2, value2_1, value2_2);
-            }
-        }
+        case -3: printf("infitely many solutions"); break;
+        case -2: printf("no solutions"); break;
+        case -1: printf("solution is %.4lf", *res0_ip); break;
+        case 0:  printf("solutions are %.4lf and %.4lf", *res0_ip + *res1_ip, *res0_ip - *res1_ip); break;
+        case 1:  printf("solution is %.4lf", *res0_ip); break;
+        case 2:  printf("solutions are %.4lf+%.4lfi and %.4lf-%.4lfi", *res0_ip, *res1_ip, *res0_ip, *res1_ip); break;
     }
 }
