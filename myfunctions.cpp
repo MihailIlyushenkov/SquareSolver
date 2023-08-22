@@ -3,7 +3,11 @@
 #include <assert.h>
 #include "myfunctions.h"
 
-
+#define NOROOTS 0
+#define INFROOTS -1
+#define ONEROOT 1
+#define TWOROOTS 2
+#define TWOCMPROOTS -2
 
 void cleaner(void)
 {
