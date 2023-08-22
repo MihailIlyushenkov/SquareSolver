@@ -1,12 +1,9 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
+#include "myfunctions.h"
 
-#define NOROOTS 0
-#define INFROOTS -1
-#define ONEROOT 1
-#define TWOROOTS 2
-#define TWOCMPROOTS -3
+
 
 void cleaner(void)
 {
@@ -23,7 +20,7 @@ bool iszero(double x)
     return (abs(x) < EPS);
 }
 
-void input(double *a_ip, double *b_ip, double *c_ip)
+void input(double *a_ip, double *b_ip, double *c_ip, int *pres_ip)
 {
     int counter = 0;
     printf("enter a, b, c in ax^2 + bx + c equation separated by a space\n");
@@ -38,20 +35,36 @@ void input(double *a_ip, double *b_ip, double *c_ip)
         }
     }
 
+    printf("enter precision for answers\n");
+    while (counter != 1)
+    {
+        counter = scanf("%d", pres_ip);
+        cleaner();
+        if (counter != 1)
+        {
+            printf("wrong input format, try again\n");
+        }
+    }
+
 }
 
-void solver(double a, double b, double c, int *outpflag_ip, double *val0_ip, double *val1_ip)
+void extdef(double a, double b, double c, int *outpflag_ip, double *val0_ip, double *val1_ip)
 {
-
-    assert(val0_ip != NULL);
-    assert(val1_ip != NULL);
-    assert(outpflag_ip != NULL);
-
     if (iszero(a))
     {
-        if (iszero(b))
+        linearsolver(b, c, val0_ip, outpflag_ip);
+    }
+    else
+    {
+        squaresolver(a, b, c, outpflag_ip, val0_ip, val1_ip);
+    }
+}
+
+void linearsolver(double a, double b, double *val0_ip, int *outpflag_ip)
+{
+    if (iszero(a))
         {
-            if (iszero(c))
+            if (iszero(b))
             {
                 *outpflag_ip = INFROOTS; /* значение для вывода ответа "беск. кол-ва корней" */
                 return;
@@ -65,9 +78,23 @@ void solver(double a, double b, double c, int *outpflag_ip, double *val0_ip, dou
         else
         {
             *outpflag_ip = ONEROOT; /* значение для вывода ответа "есть 1 корень" */
-            *val0_ip = (-c)/b;
-            return void();
+            *val0_ip = (-b)/a;
+            return;
         }
+}
+
+void squaresolver(double a, double b, double c, int *outpflag_ip, double *val0_ip, double *val1_ip)
+{
+
+    assert(val0_ip != NULL);
+    assert(val1_ip != NULL);
+    assert(outpflag_ip != NULL);
+    assert( !(iszero(a)) );
+
+    if (iszero(a))
+    {
+        linearsolver(b, c, val0_ip, outpflag_ip);
+        return;
     }
 
     double discr = pow(b, 2) - 4.0*(a*c);
@@ -92,15 +119,18 @@ void solver(double a, double b, double c, int *outpflag_ip, double *val0_ip, dou
 
 }
 
-void output(double *val0_ip, double *val1_ip, int *outpflag_ip)
+void output(double *val0_ip, double *val1_ip, int *outpflag_ip, int pres)
 {
-
     switch(*outpflag_ip)
     {
         case INFROOTS: printf("infitely many solutions"); break;
         case NOROOTS: printf("no solutions"); break;
-        case ONEROOT:  printf("solution is %.4lf", *val0_ip); break;
-        case TWOROOTS:  printf("solutions are %.4lf and %.4lf", *val0_ip + *val1_ip, *val0_ip - *val1_ip); break;
-        case TWOCMPROOTS:  printf("solutions are %.4lf+%.4lfi and %.4lf-%.4lfi", *val0_ip, *val1_ip, *val0_ip, *val1_ip); break;
+        case ONEROOT:  printf("solution is %.*lf", pres, *val0_ip); break;
+        case TWOROOTS:  printf("solutions are %.*lf and %.*lf", pres, *val0_ip + *val1_ip,
+            pres, *val0_ip - *val1_ip); break;
+        case TWOCMPROOTS:  printf("solutions are %.*lf+%.*lfi and %.*lf-%.*lfi",
+            pres, *val0_ip, pres, *val1_ip, pres, *val0_ip, pres, *val1_ip); break;
     }
 }
+
+
