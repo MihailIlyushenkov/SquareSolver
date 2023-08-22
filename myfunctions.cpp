@@ -1,5 +1,12 @@
 #include <stdio.h>
 #include <math.h>
+#include <assert.h>
+
+#define NOROOTS 0
+#define INFROOTS -1
+#define ONEROOT 1
+#define TWOROOTS 2
+#define TWOCMPROOTS -3
 
 void cleaner(void)
 {
@@ -10,6 +17,11 @@ void cleaner(void)
     }
 }
 
+bool iszero(double x)
+{
+    const double EPS = 1e-15; /* точность сравнения с 0 */
+    return (abs(x) < EPS);
+}
 
 void input(double *a_ip, double *b_ip, double *c_ip)
 {
@@ -30,63 +42,65 @@ void input(double *a_ip, double *b_ip, double *c_ip)
 
 void solver(double a, double b, double c, int *outpflag_ip, double *val0_ip, double *val1_ip)
 {
-    const double EPS = 1e-15;
-    double discr;
 
-    if (fabs(a) < EPS)
+    assert(val0_ip != NULL);
+    assert(val1_ip != NULL);
+    assert(outpflag_ip != NULL);
+
+    if (iszero(a))
     {
-        if (fabs(b) < EPS)
+        if (iszero(b))
         {
-            if (fabs(c) < EPS)
+            if (iszero(c))
             {
-                *outpflag_ip = -3;
+                *outpflag_ip = INFROOTS; /* значение для вывода ответа "беск. кол-ва корней" */
                 return;
             }
             else
             {
-                *outpflag_ip = -2;
+                *outpflag_ip = NOROOTS; /* значение для вывода ответа "нет корней"  */
                 return;
             }
         }
         else
         {
-            *outpflag_ip = -1;
+            *outpflag_ip = ONEROOT; /* значение для вывода ответа "есть 1 корень" */
             *val0_ip = (-c)/b;
             return void();
         }
     }
 
-    discr = pow(b, 2) - 4.0*(a*c);
+    double discr = pow(b, 2) - 4.0*(a*c);
     *val0_ip = (-b)/(2.0*a);
-    *val1_ip = sqrt(fabs(discr))/(2.0*a);
+    *val1_ip = sqrt(abs(discr))/(2.0*a);
 
-    if (discr > EPS)
+    if (iszero(discr))
     {
-        *outpflag_ip = 0;
+        *outpflag_ip = ONEROOT; /* значение для вывода ответа "есть 1 действ. корень" */
     }
     else
     {
-        if (fabs(discr) < EPS)
+        if ( discr > 0 )
         {
-            *outpflag_ip = 1;
+            *outpflag_ip = TWOROOTS; /* значение для вывода ответа "есть 2 действ. корня" */
         }
         else
         {
-            *outpflag_ip = 2;
+            *outpflag_ip = TWOCMPROOTS; /* значение для вывода ответа "есть 2 комплексных корня" */
         }
     }
 
 }
 
-void output(double *res0_ip, double *res1_ip, int *ptr_ip)
+void output(double *val0_ip, double *val1_ip, int *outpflag_ip)
 {
-    switch(*ptr_ip)
+
+    switch(*outpflag_ip)
     {
-        case -3: printf("infitely many solutions"); break;
-        case -2: printf("no solutions"); break;
-        case -1: printf("solution is %.4lf", *res0_ip); break;
-        case 0:  printf("solutions are %.4lf and %.4lf", *res0_ip + *res1_ip, *res0_ip - *res1_ip); break;
-        case 1:  printf("solution is %.4lf", *res0_ip); break;
-        case 2:  printf("solutions are %.4lf+%.4lfi and %.4lf-%.4lfi", *res0_ip, *res1_ip, *res0_ip, *res1_ip); break;
+        case INFROOTS: printf("infitely many solutions"); break;
+        case NOROOTS: printf("no solutions"); break;
+        case ONEROOT:  printf("solution is %.4lf", *val0_ip); break;
+        case TWOROOTS:  printf("solutions are %.4lf and %.4lf", *val0_ip + *val1_ip, *val0_ip - *val1_ip); break;
+        case TWOCMPROOTS:  printf("solutions are %.4lf+%.4lfi and %.4lf-%.4lfi", *val0_ip, *val1_ip, *val0_ip, *val1_ip); break;
     }
 }
