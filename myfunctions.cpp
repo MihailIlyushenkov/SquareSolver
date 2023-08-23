@@ -15,7 +15,7 @@ void cleaner(void)
 
 bool iszero(double x)
 {
-    const double EPS = 1e-15; /* точность сравнения с 0 */
+    const double EPS = 1e-6; /* точность сравнения с 0 */
     return (abs(x) < EPS);
 }
 
@@ -90,7 +90,6 @@ void squaresolver(double a, double b, double c, rootnum *outpflag_ptr, double *v
     assert(val0_ptr != NULL);
     assert(val1_ptr != NULL);
     assert(outpflag_ptr != NULL);
-    assert( !(iszero(a)) );
 
     if (iszero(a))
     {
@@ -98,7 +97,6 @@ void squaresolver(double a, double b, double c, rootnum *outpflag_ptr, double *v
         return;
     }
 
-    // Лучшк b * b - сделал
     double discr = b*b - 4 * a * c;
     *val0_ptr = (-b) / (2.0 * a);
     *val1_ptr = sqrt(abs(discr)) / (2.0 * a);
@@ -189,35 +187,39 @@ void TestOneEq(double dat[], rootnum outpflag_ref)
     double val1 = 0, val2 = 0;
     rootnum outpflag = NOROOTS;
 
-    squaresolver(a, b, c, &outpflag, &val1, &val2);
+    eqsdef(a, b, c, &outpflag, &val1, &val2);
 
-    if ( iszero(val1 - val1_ref) || iszero(val2 - val2_ref) || iszero(outpflag != outpflag_ref) )
+    if ( !iszero(val1 - val1_ref) || !iszero(val2 - val2_ref) || !iszero(outpflag != outpflag_ref) )
     {
-        printf("Test Failed!!! Expected: val1 = %lf, val2 = %lf.n Exected: val1 = %lf, val2 = %lf \n", val1_ref, val2_ref, val1, val2);
+        printf("Test Failed!!! Expected: val1 = %lf, val2 = %lf. Exected: val1 = %lf, val2 = %lf \n", val1_ref, val2_ref, val1, val2);
     }
     else
         printf("Test passed succesfully.\n");
 }
 
-int EquasionTester()
+errortype EquasionTester()
 {
 
     const int TestCount = 3; /* Количество строк в файле с тестами */
 
-    FILE *file = fopen("C:\\Users\\Mi\\Documents\\GitHub\\SquareSolver\\Testdat.txt", "r");
+    FILE *file = fopen("C:\\Users\\Mi\\Documents\\GitHub\\SquareSolver\\Testsdat.txt", "r");
+
+    if (file == 0)
+        return FILENOPEN;
 
     for (int i = 0; i < TestCount; i += 1)
     {
         char Enumstring[12] = {0};
-        double dat1[6] = {0};
+        double dat1[5] = {0};
         rootnum outpflag;
 
-        fscanf(file, "%lf %lf %lf %lf %lf %s",
-        &dat1[0], &dat1[1], &dat1[2], &dat1[3], &dat1[4], Enumstring);
+        fscanf(file, "%lf %lf %lf %lf %lf %s", &dat1[0], &dat1[1], &dat1[2], &dat1[3], &dat1[4], Enumstring);
+
+        /* printf("%lf %lf %lf %lf %lf %s", dat1[0], dat1[1], dat1[2], dat1[3], dat1[4], Enumstring); */
 
         outpflag = Convertstringtoenum(Enumstring);
 
-        TestOneEq(dat1[], outpflag);
+        TestOneEq(dat1, outpflag);
     }
-    return 0;
+    return NOERROR;
 }
