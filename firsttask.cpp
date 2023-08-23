@@ -10,6 +10,7 @@
 
 int main(void)
 {
+    errortype TestEr = NOERROR;
     /* double a = 0, b = 0, c = 0, val0 = 0, val1 = 0;
     rootnum outpflag;
     int prec = 1;
@@ -19,8 +20,14 @@ int main(void)
     eqsdef(a, b, c, &outpflag, &val0, &val1);
     output(&val0, &val1, outpflag, prec); */
 
-    EquasionTester();
+    TestEr = EquasionTester();
 
+    if (TestEr != NOERROR)
+    {
+        printf("UNEXPECTED ERROR: code %d\n", TestEr);
+        printf("Error codes:\n");
+        printf("code 0 - no errors\ncode 1 - error of reading file with test data");
+    }
     getchar();
 
     return 0;
