@@ -6,6 +6,11 @@ enum rootnum
     INFROOTS = -1, NOROOTS, ONEROOT, TWOROOTS, TWOCMPROOTS
 };
 
+enum errortype
+{
+    NOERROR = 0, FILENOPEN
+};
+
 void cleaner(void);
 /* ощищает поток ввода */
 
@@ -35,7 +40,7 @@ void output(double *val0_ptr, double *val1_ptr, rootnum outpflag_ptr, int prec);
 int precision_input();
 /* возвращает 1 натуральное число, введенное с клавиатуры */
 
-int EquasionTester(void);
+errortype EquasionTester(void);
 /*Вызыывает функцию TestOneEq количество TestCounter раз и передает ей данные
     из Testdata.txt*/
 
