@@ -182,26 +182,24 @@ rootnum Convertstringtoenum(char Enumstring[])
     return NOROOTS;
 }
 
-errortype TestOneEq(double dat[], rootnum outpflag_ref)
+errortype TestOneEq(TestData *Tdat)
 {
-    double a = dat[0];
-    double b = dat[1];
-    double c = dat[2];
-    double val1_ref = dat[3];
-    double val2_ref = dat[4];
+
     double val1 = 0, val2 = 0;
     rootnum outpflag = NOROOTS;
 
-    eqsdef(a, b, c, &outpflag, &val1, &val2);
+    eqsdef(Tdat -> a, Tdat -> b, Tdat -> c, &outpflag, &val1, &val2);
 
-    if (&dat[0] == NULL || &dat[1] == NULL || &dat[2] == NULL || &dat[3] == NULL || &dat[4] == NULL) //спросить
+    /*
+    if (Tdat.a == NULL || Tdat.b == NULL || Tdat.c == NULL || Tdat.val1 == NULL || Tdat.val2 == NULL) //спроситьkj
     {
         return PTRERRTESTF;
     }
+    */
 
-    if ( !iszero(val1 - val1_ref) || !iszero(val2 - val2_ref) || !iszero(outpflag != outpflag_ref) )
+    if ( !iszero(val1 - (Tdat -> val1)) || !iszero(val2 - (Tdat -> val2)) || !iszero(outpflag != (Tdat -> outpflag)) )
     {
-        printf("Test Failed!!! Expected: val1 = %lf, val2 = %lf. Exected: val1 = %lf, val2 = %lf \n", val1_ref, val2_ref, val1, val2);
+        printf("Test Failed!!! Expected: val1 = %lf, val2 = %lf. Exected: val1 = %lf, val2 = %lf \n", Tdat -> val1, Tdat -> val2, val1, val2);
         return NOERROR;
     }
     else
@@ -225,16 +223,17 @@ errortype EquasionTester()
     for (int i = 0; i < TestCount; i += 1)
     {
         char Enumstring[12] = {0};
-        double dat1[5] = {0};
-        rootnum outpflag;
 
-        fscanf(file, "%lf %lf %lf %lf %lf %s", &dat1[0], &dat1[1], &dat1[2], &dat1[3], &dat1[4], Enumstring);
+        TestData Tdata = {.a = 0, .b = 0, .c = 0, .val1 = 0, .val2 = 0, .outpflag = NOROOTS};
+
+        fscanf(file, "%lf %lf %lf %lf %lf %s", &(Tdata.a), &(Tdata.b), &(Tdata.c), &(Tdata.val1), &(Tdata.val2), Enumstring);
 
         /* printf("%lf %lf %lf %lf %lf %s", dat1[0], dat1[1], dat1[2], dat1[3], dat1[4], Enumstring); */
 
-        outpflag = Convertstringtoenum(Enumstring);
+        Tdata.outpflag = Convertstringtoenum(Enumstring);
 
-        TesterError = TestOneEq(dat1, outpflag);
+
+        TesterError = TestOneEq(&Tdata);
     }
     return TesterError;
 }
