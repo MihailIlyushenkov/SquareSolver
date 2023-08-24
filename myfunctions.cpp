@@ -19,12 +19,14 @@ bool iszero(double x)
     return (abs(x) < EPS);
 }
 
-void input(double *a_ptr, double *b_ptr, double *c_ptr)
+errortype input(double *a_ptr, double *b_ptr, double *c_ptr)
 {
 
-    assert(a_ptr != NULL);
-    assert(b_ptr != NULL);
-    assert(c_ptr != NULL);
+    if (a_ptr == NULL || b_ptr == NULL || c_ptr == NULL)
+    {
+        return PTRERRORINP;
+    }
+
 
     int counter = 0;
     printf("enter a, b, c in ax^2 + bx + c equation separated by a space\n");
@@ -39,62 +41,64 @@ void input(double *a_ptr, double *b_ptr, double *c_ptr)
         }
     }
 
+    return NOERROR;
 }
 
-void eqsdef(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr)
+errortype eqsdef(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr)
 {
-
-    assert(outpflag_ptr != NULL);
-    assert(val0_ptr != NULL);
-    assert(val1_ptr != NULL);
+    errortype ERR_in_eqsdef = NOERROR;
 
     if (iszero(a))
     {
-        linearsolver(b, c, val0_ptr, outpflag_ptr);
+        ERR_in_eqsdef = linearsolver(b, c, val0_ptr, outpflag_ptr);
     }
     else
     {
-        squaresolver(a, b, c, outpflag_ptr, val0_ptr, val1_ptr);
+        ERR_in_eqsdef = squaresolver(a, b, c, outpflag_ptr, val0_ptr, val1_ptr);
     }
+
+    return ERR_in_eqsdef;
 }
 
-void linearsolver(double a, double b, double *val0_ptr, rootnum *outpflag_ptr)
+errortype linearsolver(double a, double b, double *val0_ptr, rootnum *outpflag_ptr)
 {
-    assert(val0_ptr != NULL);
-    assert(outpflag_ptr != NULL);
+    if (val0_ptr == NULL || outpflag_ptr == NULL)
+    {
+        return PTRERRORLN;
+    }
 
     if (iszero(a))
         {
             if (iszero(b))
             {
                 *outpflag_ptr = INFROOTS; /* значение для вывода ответа "беск. кол-ва корней" */
-                return;
+                return NOERROR;
             }
             else
             {
                 *outpflag_ptr = NOROOTS; /* значение для вывода ответа "нет корней"  */
-                return;
+                return NOERROR;
             }
         }
         else
         {
             *outpflag_ptr = ONEROOT; /* значение для вывода ответа "есть 1 корень" */
             *val0_ptr = (-b)/a;
-            return;
+            return NOERROR;
         }
 }
 
-void squaresolver(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr)
+errortype squaresolver(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr)
 {
-
-    assert(val0_ptr != NULL);
-    assert(val1_ptr != NULL);
-    assert(outpflag_ptr != NULL);
+    if (val0_ptr == NULL || val1_ptr == NULL || outpflag_ptr == NULL)
+    {
+        return PTRERRORSQ;
+    }
 
     if (iszero(a))
     {
         linearsolver(b, c, val0_ptr, outpflag_ptr);
-        return;
+        return NOERROR;
     }
 
     double discr = b*b - 4 * a * c;
@@ -116,6 +120,7 @@ void squaresolver(double a, double b, double c, rootnum *outpflag_ptr, double *v
             *outpflag_ptr = TWOCMPROOTS; /* значение для вывода ответа "есть 2 комплексных корня" */
         }
     }
+    return NOERROR;
 
 }
 
@@ -177,7 +182,7 @@ rootnum Convertstringtoenum(char Enumstring[])
     return NOROOTS;
 }
 
-void TestOneEq(double dat[], rootnum outpflag_ref)
+errortype TestOneEq(double dat[], rootnum outpflag_ref)
 {
     double a = dat[0];
     double b = dat[1];
@@ -189,22 +194,32 @@ void TestOneEq(double dat[], rootnum outpflag_ref)
 
     eqsdef(a, b, c, &outpflag, &val1, &val2);
 
+    if (&dat[0] == NULL || &dat[1] == NULL || &dat[2] == NULL || &dat[3] == NULL || &dat[4] == NULL) //спросить
+    {
+        return PTRERRTESTF;
+    }
+
     if ( !iszero(val1 - val1_ref) || !iszero(val2 - val2_ref) || !iszero(outpflag != outpflag_ref) )
     {
         printf("Test Failed!!! Expected: val1 = %lf, val2 = %lf. Exected: val1 = %lf, val2 = %lf \n", val1_ref, val2_ref, val1, val2);
+        return NOERROR;
     }
     else
+    {
         printf("Test passed succesfully.\n");
+        return NOERROR;
+    }
 }
 
 errortype EquasionTester()
 {
 
+    errortype TesterError = NOERROR;
     const int TestCount = 3; /* Количество строк в файле с тестами */
 
-    FILE *file = fopen("C:\\Users\\Mi\\Documents\\GitHub\\SquareSolver\\Testsdat.txt", "r");
+    FILE *file = fopen("Testsdata.txt", "r");
 
-    if (file == 0)
+    if (file == NULL)
         return FILENOPEN;
 
     for (int i = 0; i < TestCount; i += 1)
@@ -219,7 +234,81 @@ errortype EquasionTester()
 
         outpflag = Convertstringtoenum(Enumstring);
 
-        TestOneEq(dat1, outpflag);
+        TesterError = TestOneEq(dat1, outpflag);
     }
-    return NOERROR;
+    return TesterError;
+}
+
+errortype SolveStart()
+{
+    double a = 0, b = 0, c = 0, val0 = 0, val1 = 0;
+    rootnum outpflag;
+    int prec = 1;
+
+
+    input(&a, &b, &c);
+    prec = precision_input();
+    errortype Solvstarterr = eqsdef(a, b, c, &outpflag, &val0, &val1);
+    output(&val0, &val1, outpflag, prec);
+    return Solvstarterr;
+}
+
+
+void ErrorProcessing(errortype Errorcode)
+{
+    if (Errorcode != NOERROR)
+    {
+        printf("\nUNEXPECTED ERROR: code %d\n", Errorcode);
+        printf("Error codes:\n");
+        printf("code 0 - no errors\n");
+        printf("code 1 - error of reading file with test data\n");
+        printf("code 2 - pointer error (null pointer) in Squareslover()\n");
+        printf("code 3 - pointer error (null pointer) in linearsolver()\n");
+        printf("code 4 - pointer error (null pointer) in TestOneEq()\n");
+
+    }
+}
+
+errortype CMDProcessing(int argc, char *argv[])
+{
+    errortype Errcode = NOERROR;
+
+    int inp = 0;
+
+    if (argc >= 2)
+    {
+        if (!(strcmp(argv[1], "--solve")))
+        {
+            inp = 1;
+        }
+        else
+        {
+            if ( !(strcmp(argv[1], "--test")) )
+            {
+            inp = -1;
+            }
+        }
+    }
+
+    if (inp == 1)
+    {
+        Errcode = SolveStart();
+    }
+
+    else
+    {
+        if (inp == -1)
+        {
+            Errcode = EquasionTester();
+        }
+        else
+        {
+            if (inp == 0)
+            {
+                printf("Square equasion solver by Mihail Ilyushenkov @2023 v1.0.idkn\nEnter test to run --tests or --solve to enter your equasion");
+            }
+        }
+    }
+
+    return Errcode;
 }
