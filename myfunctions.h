@@ -11,6 +11,16 @@ enum errortype
     NOERROR = 0, FILENOPEN, PTRERRORSQ, PTRERRORLN, PTRERRTESTF, PTRERRORINP
 };
 
+struct TestData
+{
+    double a;
+    double b;
+    double c;
+    double val1;
+    double val2;
+    rootnum outpflag;
+};
+
 void cleaner(void);
 /* ощищает поток ввода */
 
@@ -44,7 +54,7 @@ errortype EquasionTester(void);
 /*Вызыывает функцию TestOneEq количество TestCounter раз и передает ей данные
     из Testdata.txt*/
 
-errortype TestOneEq(double dat[], rootnum outpfag_ref);
+errortype TestOneEq(TestData *Tdat);
 #endif /*MYFUNCTIONS_H*/
 
 rootnum Convertstringtoenum(char Enumstring[]);
