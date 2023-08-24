@@ -9,12 +9,13 @@
 
 int main(int argc, char *argv[])
 {
-    errortype Errcode = NOERROR;
 
 
-    Errcode = CMDProcessing(argc, argv);
+    ErrorStruct MainError;
 
-    ErrorProcessing(Errcode);
+    MainError = CMDProcessing(argc, argv);
+
+    ErrorProcessing(MainError);
 
     getchar();
 

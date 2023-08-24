@@ -8,12 +8,12 @@ enum rootnum
 
 enum errortype
 {
-    NOERROR = 0, FILENOPEN, PTRERRORSQ, PTRERRORLN, PTRERRTESTF, PTRERRORINP
+    NOERROR = 0, BAD_NULL_PTR, FILENOTOPEN
 };
 
 enum progtarget
 {
-    SOLVETAR = 0, TESTTAR, HELPTAR
+    SOLVETAR = 0, TESTTAR, HELPTAR, USTESTTAR
 };
 
 struct TestData
@@ -26,23 +26,31 @@ struct TestData
     rootnum outpflag;
 };
 
+struct ErrorStruct
+{
+    errortype Error = NOERROR;
+    const char *ErrorFileName = NULL;
+    int ErrorLineNumber = 0;
+    const char *ErrorFuncName = NULL;
+};
+
 void cleaner(void);
 /* ощищает поток ввода */
 
 bool iszero(double x);
 /* сравнивает double x с заранее заданной констатной EPS, близкой к 0. Выдает 1 если x < EPS, иначе 0) */
 
-errortype eqsdef(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr);
+ErrorStruct eqsdef(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr);
 /* вызывает linearsolver или squaresolver в зависимости от параметров a, b, c*/
 
-errortype input(double *a_ptr, double *b_ptr, double *c_ptr);
+ErrorStruct input(double *a_ptr, double *b_ptr, double *c_ptr);
 /* обрабатывает ввод. При неверных данных просит ввести их повторно. Также вызывает cleaner() */
 
-errortype linearsolver(double a, double b, double *val0_ptr, rootnum *outpflag_ptr);
+ErrorStruct linearsolver(double a, double b, double *val0_ptr, rootnum *outpflag_ptr);
 /* решает квадратное уравнение ax + b = 0.
     Записывает корень, если таковой имеется в val0_ptr и служебную переменную для вывода в *outpflag_ptr */
 
-errortype squaresolver(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr);
+ErrorStruct squaresolver(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr);
 /* Выполняет вычисления для решения уравнения. Получает на ввод данные коэффиценты a, b, c,
     а также указатели outpflag_ptr - служебную переменную для функции output() и
     val0_ptr (= -b/2a) и val1_ptr (= sqrt(b^2 - 4ac)/2a ) -
@@ -55,17 +63,22 @@ void output(double *val0_ptr, double *val1_ptr, rootnum outpflag_ptr, int prec);
 int precision_input();
 /* возвращает 1 натуральное число, введенное с клавиатуры */
 
-errortype EquasionTester(void);
+ErrorStruct EquasionTester(char Testfilename[]);
 /*Вызыывает функцию TestOneEq количество TestCounter раз и передает ей данные
     из Testdata.txt*/
 
-errortype TestOneEq(TestData *Tdat);
+ErrorStruct TestOneEq(TestData *Tdat);
 #endif /*MYFUNCTIONS_H*/
 
 rootnum Convertstringtoenum(char Enumstring[]);
+/* конвертирует строку в заранее заданный ENUM rootnum */
 
-void ErrorProcessing(errortype Errorcode);
 
-errortype CMDProcessing(int argc, char *argv[]);
+void ErrorProcessing(ErrorStruct MainError);
+/* обрабатывает ошибку в main() */
 
-errortype SolveStart();
+ErrorStruct CMDProcessing(int argc, char *argv[]);
+/* обрабатывает аргументы командной строки при запуске main.exe */
+
+ErrorStruct SolveStart();
+/* инициализирует начало решения уравнения */

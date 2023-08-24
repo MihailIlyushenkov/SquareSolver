@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include "myfunctions.h"
+#include <stdlib.h>
 
 void cleaner(void)
 {
@@ -15,16 +16,17 @@ void cleaner(void)
 
 bool iszero(double x)
 {
-    const double EPS = 1e-6; /* точность сравнения с 0 */
+    const double EPS = 1e-4; /* точность сравнения с 0 */
     return (abs(x) < EPS);
 }
 
-errortype input(double *a_ptr, double *b_ptr, double *c_ptr)
+ErrorStruct input(double *a_ptr, double *b_ptr, double *c_ptr)
 {
+    ErrorStruct INPError;
 
     if (a_ptr == NULL || b_ptr == NULL || c_ptr == NULL)
     {
-        return PTRERRORINP;
+        return INPError; /* возврат ошибки */
     }
 
 
@@ -41,12 +43,12 @@ errortype input(double *a_ptr, double *b_ptr, double *c_ptr)
         }
     }
 
-    return NOERROR;
+    return INPError; /* возврат ошибки */
 }
 
-errortype eqsdef(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr)
+ErrorStruct eqsdef(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr)
 {
-    errortype ERR_in_eqsdef = NOERROR;
+    ErrorStruct ERR_in_eqsdef;
 
     if (iszero(a))
     {
@@ -57,14 +59,17 @@ errortype eqsdef(double a, double b, double c, rootnum *outpflag_ptr, double *va
         ERR_in_eqsdef = squaresolver(a, b, c, outpflag_ptr, val0_ptr, val1_ptr);
     }
 
-    return ERR_in_eqsdef;
+    return ERR_in_eqsdef; /* возврат ошибки */
 }
 
-errortype linearsolver(double a, double b, double *val0_ptr, rootnum *outpflag_ptr)
+ErrorStruct linearsolver(double a, double b, double *val0_ptr, rootnum *outpflag_ptr)
 {
+    ErrorStruct LNsolvError;
+
     if (val0_ptr == NULL || outpflag_ptr == NULL)
     {
-        return PTRERRORLN;
+        LNsolvError = ErrorStruct{.Error = BAD_NULL_PTR, .ErrorFileName = __FILE__, .ErrorLineNumber = __LINE__, .ErrorFuncName = __PRETTY_FUNCTION__};
+        return LNsolvError; /* возврат ошибки */
     }
 
     if (iszero(a))
@@ -72,33 +77,35 @@ errortype linearsolver(double a, double b, double *val0_ptr, rootnum *outpflag_p
             if (iszero(b))
             {
                 *outpflag_ptr = INFROOTS; /* значение для вывода ответа "беск. кол-ва корней" */
-                return NOERROR;
+                return LNsolvError; /* возврат ошибки */
             }
             else
             {
                 *outpflag_ptr = NOROOTS; /* значение для вывода ответа "нет корней"  */
-                return NOERROR;
+                return LNsolvError; /* возврат ошибки */
             }
         }
         else
         {
             *outpflag_ptr = ONEROOT; /* значение для вывода ответа "есть 1 корень" */
             *val0_ptr = (-b)/a;
-            return NOERROR;
+            return LNsolvError; /* возврат ошибки */
         }
 }
 
-errortype squaresolver(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr)
+ErrorStruct squaresolver(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr)
 {
+    ErrorStruct ErrInSQS;
     if (val0_ptr == NULL || val1_ptr == NULL || outpflag_ptr == NULL)
     {
-        return PTRERRORSQ;
+        ErrInSQS = ErrorStruct{.Error = BAD_NULL_PTR, .ErrorFileName = __FILE__, .ErrorLineNumber = __LINE__, .ErrorFuncName = __PRETTY_FUNCTION__};
+        return ErrInSQS; /* возврат ошибки */
     }
 
     if (iszero(a))
     {
         linearsolver(b, c, val0_ptr, outpflag_ptr);
-        return NOERROR;
+        return ErrInSQS; /* возврат не ошибки */
     }
 
     double discr = b*b - 4 * a * c;
@@ -120,7 +127,7 @@ errortype squaresolver(double a, double b, double c, rootnum *outpflag_ptr, doub
             *outpflag_ptr = TWOCMPROOTS; /* значение для вывода ответа "есть 2 комплексных корня" */
         }
     }
-    return NOERROR;
+    return ErrInSQS; /* возврат ошибки */
 
 }
 
@@ -182,67 +189,72 @@ rootnum Convertstringtoenum(char Enumstring[])
     return NOROOTS;
 }
 
-errortype TestOneEq(TestData *Tdat)
+ErrorStruct TestOneEq(TestData *Tdat)
 {
 
     double val1 = 0, val2 = 0;
     rootnum outpflag = NOROOTS;
 
+    ErrorStruct ErrorInTester;
+
     if (Tdat == NULL)
     {
-        return PTRERRTESTF;
+        ErrorInTester = ErrorStruct{.Error = BAD_NULL_PTR, .ErrorFileName = __FILE__, .ErrorLineNumber = __LINE__, .ErrorFuncName = __PRETTY_FUNCTION__};
+        return ErrorInTester; /* возврат ошибки */
     }
 
 
     eqsdef(Tdat -> a, Tdat -> b, Tdat -> c, &outpflag, &val1, &val2);
 
 
-
-
-
     if ( !iszero(val1 - (Tdat -> val1)) || !iszero(val2 - (Tdat -> val2)) || !iszero(outpflag != (Tdat -> outpflag)) )
     {
         printf("\033[31mTest Failed!!!\033[0m\n");
         printf("Expected: val1 = %lf, val2 = %lf. Exected: val1 = %lf, val2 = %lf \n", Tdat -> val1, Tdat -> val2, val1, val2);
-        return NOERROR;
+        return ErrorInTester; /* возврат не ошибки */
     }
     else
     {
         printf("\033[92mTest passed succesfully.\033[0m\n");
-        return NOERROR;
+        return ErrorInTester; /* возврат не ошибки */
     }
 }
 
-errortype EquasionTester()
+ErrorStruct EquasionTester(char TestFileName[])
 {
 
-    errortype TesterError = NOERROR;
-    const int TestCount = 4; /* Количество строк в файле с тестами */
+    ErrorStruct TesterError;
+    // const int TestCount = 4; /* Количество строк в файле с тестами */
+    FILE *file;
 
-    FILE *file = fopen("Testsdata.txt", "r");
+    if (TestFileName == NULL)
+    {
+        file = fopen("Testdata.txt", "r");
+    }
+    else
+    {
+        file = fopen(TestFileName, "r");
+    }
 
     if (file == NULL)
-        return FILENOPEN;
+        return TesterError = ErrorStruct{.Error = FILENOTOPEN, .ErrorFileName = __FILE__, .ErrorLineNumber = __LINE__, .ErrorFuncName = __PRETTY_FUNCTION__}; /* возврат ошибки */
 
-    for (int i = 0; i < TestCount; i += 1)
+    char Enumstring[12] = {0};
+    TestData Tdata = {.a = 0, .b = 0, .c = 0, .val1 = 0, .val2 = 0, .outpflag = NOROOTS};
+    int ScansCnt = fscanf(file, "%lf %lf %lf %lf %lf %s", &(Tdata.a), &(Tdata.b), &(Tdata.c), &(Tdata.val1), &(Tdata.val2), Enumstring);
+
+    while (ScansCnt == 6)
     {
-        char Enumstring[12] = {0};
-
-        TestData Tdata = {.a = 0, .b = 0, .c = 0, .val1 = 0, .val2 = 0, .outpflag = NOROOTS};
-
-        fscanf(file, "%lf %lf %lf %lf %lf %s", &(Tdata.a), &(Tdata.b), &(Tdata.c), &(Tdata.val1), &(Tdata.val2), Enumstring);
-
-        /* printf("%lf %lf %lf %lf %lf %s", dat1[0], dat1[1], dat1[2], dat1[3], dat1[4], Enumstring); */
-
         Tdata.outpflag = Convertstringtoenum(Enumstring);
 
-
         TesterError = TestOneEq(&Tdata);
+        ScansCnt = fscanf(file, "%lf %lf %lf %lf %lf %s", &(Tdata.a), &(Tdata.b), &(Tdata.c), &(Tdata.val1), &(Tdata.val2), Enumstring);
     }
-    return TesterError;
+
+    return TesterError; /* возврат ошибки */
 }
 
-errortype SolveStart()
+ErrorStruct SolveStart()
 {
     double a = 0, b = 0, c = 0, val0 = 0, val1 = 0;
     rootnum outpflag;
@@ -251,30 +263,27 @@ errortype SolveStart()
 
     input(&a, &b, &c);
     prec = precision_input();
-    errortype Solvstarterr = eqsdef(a, b, c, &outpflag, &val0, &val1);
+    ErrorStruct Solvstarterr = eqsdef(a, b, c, &outpflag, &val0, &val1);
     output(&val0, &val1, outpflag, prec);
-    return Solvstarterr;
+    return Solvstarterr; /* возврат ошибки */
 }
 
-
-void ErrorProcessing(errortype Errorcode)
+void ErrorProcessing(ErrorStruct Errorcode)
 {
-    if (Errorcode != NOERROR)
+    switch(Errorcode.Error)
     {
-        printf("\nUNEXPECTED ERROR: code %d\n", Errorcode);
-        printf("Error codes:\n");
-        printf("code 0 - no errors\n");
-        printf("code 1 - error of reading file with test data\n");
-        printf("code 2 - pointer error (null pointer) in Squareslover()\n");
-        printf("code 3 - pointer error (null pointer) in linearsolver()\n");
-        printf("code 4 - pointer error (null pointer) in TestOneEq()\n");
-
+        case NOERROR: break;
+        case BAD_NULL_PTR: printf("Invalid argument (NULL pointer). In file %s, in function %s, in line %d\n",
+            Errorcode.ErrorFileName, Errorcode.ErrorFuncName, Errorcode.ErrorLineNumber); break;
+        case FILENOTOPEN: printf("Invalid argument (Missing test file). In file %s, in function %s, in line %d\n",
+            Errorcode.ErrorFileName, Errorcode.ErrorFuncName, Errorcode.ErrorLineNumber); break;
+        default: printf("Unexpected Error code: %d\n", Errorcode.Error); break;
     }
 }
 
-errortype CMDProcessing(int argc, char *argv[])
+ErrorStruct CMDProcessing(int argc, char *argv[])
 {
-    errortype Errcode = NOERROR;
+    ErrorStruct Errcode;
 
     progtarget inp = HELPTAR;
 
@@ -288,40 +297,30 @@ errortype CMDProcessing(int argc, char *argv[])
         {
             if ( !(strcmp(argv[1], "--test")) )
             {
-            inp = TESTTAR;
+                inp = TESTTAR;
+
+                if (argc == 3)
+                {
+                    inp = USTESTTAR;
+                }
+
             }
         }
     }
 
+    if (Errcode.Error != NOERROR)
+    {
+        return Errcode;
+    }
 
     switch(inp)
     {
         case SOLVETAR: Errcode = SolveStart(); break;
         case HELPTAR: printf("Square equasion solver by Mihail Ilyushenkov @2023 v1.0.idkn\nEnter test to run --tests or --solve to enter your equasion"); break;
-        case TESTTAR: Errcode = EquasionTester(); break;
+        case TESTTAR: Errcode = EquasionTester(NULL); break;
+        case USTESTTAR:Errcode = EquasionTester(argv[2]); break;
         default: printf("nu error i error (inp not found), che bubnit...."); break;
     }
 
-    /*
-    if (inp == 1)
-    {
-        Errcode = SolveStart();
-    }
-
-    else
-    {
-        if (inp == -1)
-        {
-            Errcode = EquasionTester();
-        }
-        else
-        {
-            if (inp == 0)
-            {
-                printf("Square equasion solver by Mihail Ilyushenkov @2023 v1.0.idkn\nEnter test to run --tests or --solve to enter your equasion");
-            }
-        }
-    }
-    */
-    return Errcode;
+    return Errcode; /* возврат ошибки */
 }
