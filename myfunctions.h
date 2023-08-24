@@ -11,6 +11,11 @@ enum errortype
     NOERROR = 0, FILENOPEN, PTRERRORSQ, PTRERRORLN, PTRERRTESTF, PTRERRORINP
 };
 
+enum progtarget
+{
+    SOLVETAR = 0, TESTTAR, HELPTAR
+};
+
 struct TestData
 {
     double a;
