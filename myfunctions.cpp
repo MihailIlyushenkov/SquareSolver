@@ -188,23 +188,27 @@ errortype TestOneEq(TestData *Tdat)
     double val1 = 0, val2 = 0;
     rootnum outpflag = NOROOTS;
 
-    eqsdef(Tdat -> a, Tdat -> b, Tdat -> c, &outpflag, &val1, &val2);
-
-    /*
-    if (Tdat.a == NULL || Tdat.b == NULL || Tdat.c == NULL || Tdat.val1 == NULL || Tdat.val2 == NULL) //спроситьkj
+    if (Tdat == NULL)
     {
         return PTRERRTESTF;
     }
-    */
+
+
+    eqsdef(Tdat -> a, Tdat -> b, Tdat -> c, &outpflag, &val1, &val2);
+
+
+
+
 
     if ( !iszero(val1 - (Tdat -> val1)) || !iszero(val2 - (Tdat -> val2)) || !iszero(outpflag != (Tdat -> outpflag)) )
     {
-        printf("Test Failed!!! Expected: val1 = %lf, val2 = %lf. Exected: val1 = %lf, val2 = %lf \n", Tdat -> val1, Tdat -> val2, val1, val2);
+        printf("\033[31mTest Failed!!!\033[0m\n");
+        printf("Expected: val1 = %lf, val2 = %lf. Exected: val1 = %lf, val2 = %lf \n", Tdat -> val1, Tdat -> val2, val1, val2);
         return NOERROR;
     }
     else
     {
-        printf("Test passed succesfully.\n");
+        printf("\033[92mTest passed succesfully.\033[0m\n");
         return NOERROR;
     }
 }
@@ -213,7 +217,7 @@ errortype EquasionTester()
 {
 
     errortype TesterError = NOERROR;
-    const int TestCount = 3; /* Количество строк в файле с тестами */
+    const int TestCount = 4; /* Количество строк в файле с тестами */
 
     FILE *file = fopen("Testsdata.txt", "r");
 
@@ -272,23 +276,33 @@ errortype CMDProcessing(int argc, char *argv[])
 {
     errortype Errcode = NOERROR;
 
-    int inp = 0;
+    progtarget inp = HELPTAR;
 
     if (argc >= 2)
     {
         if (!(strcmp(argv[1], "--solve")))
         {
-            inp = 1;
+            inp = SOLVETAR;
         }
         else
         {
             if ( !(strcmp(argv[1], "--test")) )
             {
-            inp = -1;
+            inp = TESTTAR;
             }
         }
     }
 
+
+    switch(inp)
+    {
+        case SOLVETAR: Errcode = SolveStart(); break;
+        case HELPTAR: printf("Square equasion solver by Mihail Ilyushenkov @2023 v1.0.idkn\nEnter test to run --tests or --solve to enter your equasion"); break;
+        case TESTTAR: Errcode = EquasionTester(); break;
+        default: printf("nu error i error (inp not found), che bubnit...."); break;
+    }
+
+    /*
     if (inp == 1)
     {
         Errcode = SolveStart();
@@ -308,6 +322,6 @@ errortype CMDProcessing(int argc, char *argv[])
             }
         }
     }
-
+    */
     return Errcode;
 }
