@@ -243,8 +243,13 @@ ErrorStruct EquasionTester(char TestFileName[])
     TestData Tdata = {.a = 0, .b = 0, .c = 0, .val1 = 0, .val2 = 0, .outpflag = NOROOTS};
     int ScansCnt = fscanf(file, "%lf %lf %lf %lf %lf %s", &(Tdata.a), &(Tdata.b), &(Tdata.c), &(Tdata.val1), &(Tdata.val2), Enumstring);
 
-    while (ScansCnt == 6)
+    while (ScansCnt != -1)
     {
+        if (ScansCnt != 6)
+        {
+            return TesterError = ErrorStruct{.Error = BADTESTARGUMENTS, .ErrorFileName = __FILE__, .ErrorLineNumber = __LINE__, .ErrorFuncName = __PRETTY_FUNCTION__};
+        }
+
         Tdata.outpflag = Convertstringtoenum(Enumstring);
 
         TesterError = TestOneEq(&Tdata);
@@ -276,6 +281,8 @@ void ErrorProcessing(ErrorStruct Errorcode)
         case BAD_NULL_PTR: printf("Invalid argument (NULL pointer). In file %s, in function %s, in line %d\n",
             Errorcode.ErrorFileName, Errorcode.ErrorFuncName, Errorcode.ErrorLineNumber); break;
         case FILENOTOPEN: printf("Invalid argument (Missing test file). In file %s, in function %s, in line %d\n",
+            Errorcode.ErrorFileName, Errorcode.ErrorFuncName, Errorcode.ErrorLineNumber); break;
+        case BADTESTARGUMENTS: printf("Invalid argument (Invalid test parameter) In file %s, in function %s, in line %d\n",
             Errorcode.ErrorFileName, Errorcode.ErrorFuncName, Errorcode.ErrorLineNumber); break;
         default: printf("Unexpected Error code: %d\n", Errorcode.Error); break;
     }

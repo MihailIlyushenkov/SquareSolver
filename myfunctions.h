@@ -8,7 +8,7 @@ enum rootnum
 
 enum errortype
 {
-    NOERROR = 0, BAD_NULL_PTR, FILENOTOPEN
+    NOERROR = 0, BAD_NULL_PTR, FILENOTOPEN, BADTESTARGUMENTS
 };
 
 enum progtarget
