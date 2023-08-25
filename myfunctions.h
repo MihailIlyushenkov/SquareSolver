@@ -200,5 +200,13 @@ ErrorStruct CMDProcessing(int argc, char *argv[]);
 */
 ErrorStruct SolveStart();
 
+/*!
+определяет непосредственно аргументы ком. строки и переводит их в enum progtarget
+\param[in] argc кол-во аргументов командной строки
+\param[in] argv[] 2й аргумент командной строки
+\return progtarget для дальнейшей обработки в CMDProcessing()
+*/
+progtarget Arg_Identifier(int argc, char *argv[]);
+
 
 #endif /*MYFUNCTIONS_H*/

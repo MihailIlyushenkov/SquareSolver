@@ -218,13 +218,13 @@ ErrorStruct TestOneEq(TestData *Tdat)
 
     if ( !iszero(val1 - (Tdat -> val1)) || !iszero(val2 - (Tdat -> val2)) || !iszero(outpflag != (Tdat -> outpflag)) )
     {
-        printf(TO_RED"Test Failed!!!\n"TO_DEFAULT);
+        printf(TO_RED "Test Failed!!!\n" TO_DEFAULT);
         printf("Expected: val1 = %lf, val2 = %lf. Exected: val1 = %lf, val2 = %lf \n", Tdat -> val1, Tdat -> val2, val1, val2);
         return ErrorInTester; /* возврат не ошибки */
     }
     else
     {
-        printf(TO_GREEN"Test passed succesfully.\n"TO_DEFAULT);
+        printf(TO_GREEN "Test passed succesfully.\n" TO_DEFAULT);
         return ErrorInTester; /* возврат не ошибки */
     }
 }
@@ -233,7 +233,6 @@ ErrorStruct EquasionTester(char TestFileName[])
 {
 
     ErrorStruct TesterError;
-    // const int TestCount = 4; /* Количество строк в файле с тестами */
     FILE *file;
 
     if (TestFileName == NULL)
@@ -313,12 +312,40 @@ ErrorStruct CMDProcessing(int argc, char *argv[])
 
     progtarget inp = SOLVETAR;
 
+    inp = Arg_Identifier(argc, argv);
+
     // вынести в отдельную ф-ию
+
+
+    /*
+    if (Errcode.Error != NOERROR)
+    {
+        return Errcode;
+    }
+    */
+
+    switch(inp)
+    {
+        case SOLVETAR: Errcode = SolveStart(); break;
+        case HELPTAR: printf("Square equasion solver by Mihail Ilyushenkov @2023 v1.0.idkn\nEnter --test to run tests or other to solve your equasion"); break;
+        case TESTTAR: Errcode = EquasionTester(NULL); break;
+        case USTESTTAR:Errcode = EquasionTester(argv[2]); break;
+        default: printf("nu error i error (inp not found), che bubnit...."); break;
+    }
+
+    return Errcode; /* возврат ошибки */
+}
+
+
+progtarget Arg_Identifier(int argc, char *argv[])
+{
+    progtarget inp = SOLVETAR;
+
     if (argc >= 2)
     {
-        if (!(strcmp(argv[1], "--solve")))
+        if (!(strcmp(argv[1], "--help")))
         {
-            inp = SOLVETAR;
+            inp = HELPTAR;
         }
         else
         {
@@ -335,21 +362,5 @@ ErrorStruct CMDProcessing(int argc, char *argv[])
         }
     }
 
-    /*
-    if (Errcode.Error != NOERROR)
-    {
-        return Errcode;
-    }
-    */
-
-    switch(inp)
-    {
-        case SOLVETAR: Errcode = SolveStart(); break;
-        case HELPTAR: printf("Square equasion solver by Mihail Ilyushenkov @2023 v1.0.idkn\nEnter test to run --tests or --solve to enter your equasion"); break;
-        case TESTTAR: Errcode = EquasionTester(NULL); break;
-        case USTESTTAR:Errcode = EquasionTester(argv[2]); break;
-        default: printf("nu error i error (inp not found), che bubnit...."); break;
-    }
-
-    return Errcode; /* возврат ошибки */
+    return inp;
 }
