@@ -3,14 +3,18 @@
 #include "myfunctions.h"
 #include <string.h>
 
-// Почитать про doxygen
-// Make почитать
+///\file
+///\brief Основной файл программы, решающей квадратное уравнение.
 
+/*! \mainpage
+* Реализована возможность решать квадратные уравнения, введенные в консоль
+*
+* Реализована возможность тестирования через кастомный файл
+
+*/
 
 int main(int argc, char *argv[])
 {
-
-
     ErrorStruct MainError;
 
     MainError = CMDProcessing(argc, argv);
