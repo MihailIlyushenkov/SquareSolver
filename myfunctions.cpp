@@ -5,6 +5,18 @@
 #include "myfunctions.h"
 #include <stdlib.h>
 
+/// TODO: Лучше сделать более читабельное название для этого файла, например solveEquation.cpp, поскольку
+/// название каждого файла должно отображать функции, которые в нём содержатся.
+/// В связи с предыдущим коментарием, лучше будет разбить этот файл на несколько других, например: 
+
+/// test.cpp, test.h - в этих файлах содержаться только функции, которые относятся к тестированию.
+/// solveEquation.cpp, solveEquation.h - в этих файлах содержатся остальные функции.
+/// errorHandler.h - в этом файле у тебя содержатся определения структур, enum и макросов связанных с ошибками
+/// Ты ведь будешь обрабатывать ошибки не только в этом проекте? Так ты сможешь просто скопировать файл для обработки ошибок в следующий 
+
+/// Помимо того, что разделение на файлы с говорящим именем лучше структурирует проект, это помогает 
+/// условной компиляции проекта, т. е. в зависимости от некоторого условия компилировать не весь проект, а только некоторую егг часть
+/// (это намёк на то, что ещё можно сделать в твоём проекте)
 
 /*!
 \file
@@ -13,12 +25,25 @@
 Данный файл содержит в себе основные функции, используемые в программе
 */
 
-
+/// TODO: #define лучше будет заменить на static const char*
+/// Если есть возможность выбора между макросом и константой - лучше выбирать константу. То же самое относится к выбору между макросом и функцией.
 #define TO_RED     "\033[31m"
 #define TO_DEFAULT "\033[0m"
 #define TO_GREEN   "\033[32m"
 
+/// TODO: Лучше будет выработать привычку оборчивать выражения внутри макроса в скобки
+/// т. е 
+/// #define EXCEPTION(ERR_CODE) (ErrorStruct{.Error = (ERR_CODE), .ErrorFileName = __FILE__, .ErrorLineNumber = __LINE__, .ErrorFuncName = __PRETTY_FUNCTION__})
+/// Лучше убрать точку с запятой в конце, так как это позволяет его использование без точки с запятой, что портит "стиль" кода, 
+/// когда у тебя любая конструкция должна оканчиваться ';'. 
 #define EXCEPTION(ERR_CODE) ErrorStruct{.Error = ERR_CODE, .ErrorFileName = __FILE__, .ErrorLineNumber = __LINE__, .ErrorFuncName = __PRETTY_FUNCTION__};
+/// Почему стоит выработать привычку оборачивать в скобки смотри пример:
+/// #define SUM(a, b) a + b
+/// ...
+/// return SUM(x * y, 15) * z;
+/// если не будет скобок это раскроется в
+/// x * y + 15 * z, что не является тем, что мы ожидали увидеть, поскольку ожидали увидеть мы
+/// ((x * y) + 15) * z
 
 void ClearBuffer(void)
 {
@@ -29,6 +54,7 @@ void ClearBuffer(void)
     }
 }
 
+/// TODO: Имена всех функций лучше иметь в едином кодстайле, т.е IsZero, так как в других местах у тебя имена функций в таком кодстайле написаны.
 bool iszero(double x)
 {
     const double EPS = 1e-4; ///точность сравнения с 0
@@ -37,13 +63,16 @@ bool iszero(double x)
 
 ErrorStruct Input(TestData *ReturnData)
 {
+    /// TODO: Зачем создавать структуру для ошибки, пока у тебя её нет?
     ErrorStruct INPError;
 
-    if (ReturnData == NULL)
-    {
-        return INPError = EXCEPTION(INVALID_ARGUMENT); /* возврат ошибки */
-    }
-
+    //------------------------------------------------------------------------// Данный участок коду у тебя повторяется много раз
+    if (ReturnData == NULL)                                                   // в разных функциях. Это можно вынести в макрос
+    {                                                                         // CHECK_ARGUMENT(PTR)
+        /// TODO: return EXCEPTION(INVALID_ARGUMENT);                         //
+        return INPError = EXCEPTION(INVALID_ARGUMENT); /* возврат ошибки */   //
+    }                                                                         //
+    //------------------------------------------------------------------------//
 
     int counter = 0;
     printf("enter a, b, c in ax^2 + bx + c equation separated by a space\n");
@@ -62,12 +91,15 @@ ErrorStruct Input(TestData *ReturnData)
     ReturnData -> b = b;
     ReturnData -> c = c;
 
+    /// TODO: если у тебя будет макрос для обработки ошибко, то переменной INPError, не будет
+    /// return ErrorStruct {};
     return INPError; /* возврат ошибки */
 }
 
 
 ErrorStruct SolveEquation(TestData *EquationData)
 {
+    /// TODO: СHECK_ARGUMENT(EquationData);
     ErrorStruct ERR_in_SolveEquation;
 
     if (iszero(EquationData -> a))
@@ -84,6 +116,7 @@ ErrorStruct SolveEquation(TestData *EquationData)
 
 ErrorStruct SolveLinearEquation(TestData *EquationData)
 {
+    /// TODO: СHECK_ARGUMENT(EquationData);
     ErrorStruct LNsolvError;
 
     if (EquationData == NULL)
@@ -105,16 +138,20 @@ ErrorStruct SolveLinearEquation(TestData *EquationData)
                 return LNsolvError; /* возврат ошибки */
             }
         }
+    /// TODO: поправить табуляцию, else должен располагаться на том же уровне, что и if
         else
         {
             (EquationData -> outpflag) = ONE_ROOT; /* значение для вывода ответа "есть 1 корень" */
             (EquationData -> val1) = -(EquationData -> b)/(EquationData -> a);
             return LNsolvError; /* возврат ошибки */
         }
+    /// TODO: Читабельнее, когда находится один return в конце функции
+    /// return ErrorStruct {};
 }
 
 ErrorStruct SolveSquareEquation(TestData *EquationData)
 {
+    /// TODO: СHECK_ARGUMENT(EquationData);
     ErrorStruct ErrInSQS;
 
     if (EquationData == NULL)
@@ -127,6 +164,7 @@ ErrorStruct SolveSquareEquation(TestData *EquationData)
     double b = EquationData -> b;
     double c = EquationData -> c;
 
+    /// TODO: пробелы b * b;
     double discr = b*b - 4 * a * c;
 
     EquationData -> val1 = (-b) / (2.0 * a);
@@ -148,8 +186,10 @@ ErrorStruct SolveSquareEquation(TestData *EquationData)
 
 }
 
+/// TODO: OutpData не изменяется, лучше передавать по константному указателю
 void Output(TestData *OutpData, int prec)
 {
+    /// TODO: СHECK_ARGUMENT(EquationData);
     double val1 = OutpData -> val1;
     double val2 = OutpData -> val2;
     switch(OutpData -> outpflag)
@@ -183,8 +223,12 @@ int PrecisionInput()
     return prec;
 }
 
+/// TODO: Названия функций лучше сделать в едином кодстайле 
+/// ConvertStringToEnum()
+/// Лучше передавать по константному указалю, если данные не изменяюются
 rootnum Convertstringtoenum(char Enumstring[])
 {
+    /// TODO: СHECK_ARGUMENT(Enumstring);
     if (!(strcmp(Enumstring, "INF_ROOTS")))
     {
         return INF_ROOTS;
@@ -208,6 +252,8 @@ rootnum Convertstringtoenum(char Enumstring[])
     return NO_ROOTS;
 }
 
+/// TODO: Дешевле по памяти будет передавать по указателю, так у тебя будет копирование 8 байт, вместо 44
+/// ErrorStruct TestOneEq(const TestData* Tdat_ref)
 ErrorStruct TestOneEq(TestData Tdat_ref)
 {
 
@@ -215,7 +261,7 @@ ErrorStruct TestOneEq(TestData Tdat_ref)
 
     TestData Tdat_out {.a = Tdat_ref.a, .b = Tdat_ref.b, .c = Tdat_ref.c, .val1 = 0, .val2 = 0, .outpflag = NO_ROOTS};
 
-
+    /// TODO: Нет проверки возвращаемого значение, вдруг там ошибка? 
     SolveEquation(&Tdat_out);
 
     if ( !iszero(Tdat_ref.val1 - Tdat_out.val1) || !iszero(Tdat_ref.val2 - Tdat_out.val2) || !iszero(Tdat_ref.outpflag - Tdat_out.outpflag) )
@@ -231,9 +277,10 @@ ErrorStruct TestOneEq(TestData Tdat_ref)
     }
 }
 
+/// TODO: TestFileName не изменяется, лучше передавать const char, вместо char 
 ErrorStruct EquationTester(char TestFileName[])
 {
-
+    /// TODO: СHECK_ARGUMENT(TestFileName);
     ErrorStruct TesterError;
     FILE *file;
 
@@ -247,6 +294,7 @@ ErrorStruct EquationTester(char TestFileName[])
     }
 
     if (file == NULL)
+        /// TODO: return EXCEPTION(FILE_NOT_OPEN), чтобы не плодить переменные
         return TesterError = EXCEPTION(FILE_NOT_OPEN); /* возврат ошибки */
 
     char Enumstring[12] = {0};
@@ -267,6 +315,7 @@ ErrorStruct EquationTester(char TestFileName[])
         ScansCnt = fscanf(file, "%lf %lf %lf %lf %lf %s", &(Tdata.a), &(Tdata.b), &(Tdata.c), &(Tdata.val1), &(Tdata.val2), Enumstring);
     }
 
+    /// TODO: return ErrorStruct {};
     return TesterError; /* возврат ошибки */
 }
 
@@ -280,9 +329,12 @@ ErrorStruct SolveStart()
     prec = PrecisionInput();
 
 
+    /// TODO: Локальные переменные тоже должны быть все в едином кодстайле
     // struct
     ErrorStruct Solvstarterr = SolveEquation(&EquationData);
 
+    /// TODO: Лучше вернуть сразу ошибку, чем запускать код с заведомо ошибочными данными. Обработку ошибки тоже можно обернуть
+    /// в макрос CHECK_ERROR
     /*
     if (ErrorStruct.ERROR != NOERROR)
     {
@@ -290,7 +342,9 @@ ErrorStruct SolveStart()
     }
     */
 
+    /// TODO: Нет обработки возвращаемого значения
     Output(&EquationData, prec);
+
     return Solvstarterr; /* возврат ошибки */
 }
 
@@ -311,6 +365,8 @@ void ErrorProcessing(ErrorStruct Errorcode)
 
 ErrorStruct CMDProcessing(int argc, char *argv[])
 {
+    /// TODO: СHECK_ARGUMENT(argv);
+
     ErrorStruct Errcode;
 
     progtarget inp = SOLVETAR;
@@ -332,6 +388,8 @@ ErrorStruct CMDProcessing(int argc, char *argv[])
 
 progtarget Arg_Identifier(int argc, char *argv[])
 {
+    /// TODO: СHECK_ARGUMENT(argv);
+
     progtarget inp = SOLVETAR;
 
     if (argc >= 2)
@@ -340,6 +398,7 @@ progtarget Arg_Identifier(int argc, char *argv[])
         {
             inp = HELPTAR;
         }
+        /// TODO: Просто else if будет более читабельно 
         else
         {
             if ( !(strcmp(argv[1], "--test")) )
