@@ -85,72 +85,58 @@ bool iszero(double x);
 
 /*!
 Вызывает SolveLinearEquation или SolveSquareEquation в зависимости от параметров a, b, c
-\param[in] a параметр a
-\param[in] b параметр b
-\param[in] c параметр c
-\param[out] outpflag_ptr указатель на внешний служебный параметр для вывода
-\param[out] val0_ptr указатель на параметр val0
-\param[out] val1_ptr указатель на параметр val1
+\param[in] EquasionData - структура с данными для решения уравнения с
+\param[out] outpflag указатель на служебный параметр для вывода в стрктуре
+\param[out] val1 параметр val0 в структуре
+\param[out] val2 параметр val1 в структуре
 \return Структура с информацией об ошибках
 */
-
-// SolveEquation
-ErrorStruct SolveEquation(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr);
+ErrorStruct SolveEquation(TestData *EquasionData);
 
 /*!
 Обрабатывает ввод из консоли. При неверных данных просит ввести их повторно. Также вызывает ClearBuffer()
-\param[out] a_ptr указатель на внешний параметр а
-\param[out] b_ptr указатель на внешний параметр b
-\param[out] c_ptr указатель на внешний параметр c
+\param[in] EquasionData - указатель на структуру с данными для решения уравнения
+\param[out] EquasionData->a коэффицент a
+\param[out] EquasionData->b коэффицент b
+\param[out] EquasionData->c коэффицент c
 \return Структура с информацией об ошибках
 */
-ErrorStruct Input(double *a_ptr, double *b_ptr, double *c_ptr);
+ErrorStruct Input(TestData *ReturnData);
 
 /*!
 Решает линейное уравнение ax + b = 0
-\param[in] коэффицент a
-\param[in] коэффицент b
-\param[out] val0_ptr записывает корень, если таковой имеется по этому адресу
-\param[out] outpflag_ptr записывает по этому адресу служебное значение для вывода в функции Output()
+\param[in] EquasionData указатель на структуру с данными для решения уравнения
+
+\param[out] EquasionData->val0 значение корня, если таковой имеется
+\param[out] EquasionData->outpflag служебное значение для вывода в функции Output()
 \return Структура с информацией об ошибках
 */
-
-// SolveLinearEquation
-ErrorStruct SolveLinearEquation(double a, double b, double *val0_ptr, rootnum *outpflag_ptr);
+ErrorStruct SolveLinearEquation(TestData *EquasionData);
 
 
 /*!
 Решает квадратное  уравнение  ax^2 + bx + c = 0
-\param[in] коэффицент a
-\param[in] коэффицент b
-\param[in] коэффицент c
-\param[out] val0_ptr записывает первую часть ответа, равную -b/2a
-\param[out] val0_ptr записывает вторую часть ответа, равную sqrt(discr)/2a, где discr = b**2 - 4ac, sqrt - квадратный корень
-\param[out] outpflag_ptr записывает по этому адресу служебное значение для вывода в функции Output()
+\param[in] EquasionData указатель на структуру с данными для решения уравнения
+\param[out] EquasionData->val1 записывает первую часть ответа, равную -b/2a
+\param[out] EquasionData->val2 записывает вторую часть ответа, равную sqrt(discr)/2a, где discr = b**2 - 4ac, sqrt - квадратный корень
+\param[out] EquasionData->outpflag записывает служебное значение для вывода в функции Output()
 \return Структура с информацией об ошибках
 */
-ErrorStruct SolveSquareEquation(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr);
+ErrorStruct SolveSquareEquation(TestData *EquasionData);
 
 
 /*!
 функция вывода данных в консоль из функции solver()
-\param[in] val0_ptr указатель на первую часть ответа, равную -b/2a
-\param[in] val1_ptr указатель на вторую часть ответа, равную sqrt(discr)/2a, где discr = b**2 - 4ac
-\param[in] outpflag_ptr указатель на служебную переменную для правильного формата вывода ответа
+\param[in] OutpData структура с данными решенного уравнения
 \param[in] prec количество знаков после запятой при выводе ответа
 */
-
-
-void Output(double *val0_ptr, double *val1_ptr, rootnum outpflag_ptr, int prec);
+void Output(TestData *OutpData, int prec);
 
 
 /*!
 возвращает 1 натуральное число, введенное с клавиатуры
 \return натуральное число
 */
-
-
-// Код стайл в одном ститле
 int PrecisionInput();
 
 
@@ -160,10 +146,10 @@ int PrecisionInput();
 \param[in] Testfilename имя файла с тестами
 \return Структура с информацией об ошибках
 */
-ErrorStruct EquasionTester(char Testfilename[]);
+ErrorStruct EquationTester(char Testfilename[]);
 
 
-ErrorStruct TestOneEq(TestData *Tdat);
+ErrorStruct TestOneEq(TestData Tdat);
 /*!
 Тестирует програму решения уравнения
 \param[in] TestData Структура, содержащая коэффиценты уравнения и эталонные решения для них
@@ -203,10 +189,9 @@ ErrorStruct SolveStart();
 /*!
 определяет непосредственно аргументы ком. строки и переводит их в enum progtarget
 \param[in] argc кол-во аргументов командной строки
-\param[in] argv[] 2й аргумент командной строки
+\param[in] argv[] аргументы командной строки
 \return progtarget для дальнейшей обработки в CMDProcessing()
 */
 progtarget Arg_Identifier(int argc, char *argv[]);
-
 
 #endif /*MYFUNCTIONS_H*/

@@ -35,123 +35,133 @@ bool iszero(double x)
     return (abs(x) < EPS);
 }
 
-ErrorStruct Input(double *a_ptr, double *b_ptr, double *c_ptr)
+ErrorStruct Input(TestData *ReturnData)
 {
     ErrorStruct INPError;
 
-    if (a_ptr == NULL || b_ptr == NULL || c_ptr == NULL)
+    if (ReturnData == NULL)
     {
-        return INPError; /* возврат ошибки */
+        return INPError = EXCEPTION(INVALID_ARGUMENT); /* возврат ошибки */
     }
 
 
     int counter = 0;
     printf("enter a, b, c in ax^2 + bx + c equation separated by a space\n");
+    double a, b, c = 0;
 
     while (counter != 3)
     {
-        counter = scanf("%lf%lf%lf", a_ptr, b_ptr, c_ptr);
+        counter = scanf("%lf%lf%lf", &a, &b, &c);
         ClearBuffer();
         if (counter != 3)
         {
             printf("wrong Input format, try again\n");
         }
     }
+    ReturnData -> a = a;
+    ReturnData -> b = b;
+    ReturnData -> c = c;
 
     return INPError; /* возврат ошибки */
 }
 
 
-ErrorStruct SolveEquation(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr)
+ErrorStruct SolveEquation(TestData *EquationData)
 {
     ErrorStruct ERR_in_SolveEquation;
 
-    if (iszero(a))
+    if (iszero(EquationData -> a))
     {
-        ERR_in_SolveEquation = SolveLinearEquation(b, c, val0_ptr, outpflag_ptr);
+        ERR_in_SolveEquation = SolveLinearEquation(EquationData);
     }
     else
     {
-        ERR_in_SolveEquation = SolveSquareEquation(a, b, c, outpflag_ptr, val0_ptr, val1_ptr);
+        ERR_in_SolveEquation = SolveSquareEquation(EquationData);
     }
 
     return ERR_in_SolveEquation; /* возврат ошибки */
 }
 
-ErrorStruct SolveLinearEquation(double a, double b, double *val0_ptr, rootnum *outpflag_ptr)
+ErrorStruct SolveLinearEquation(TestData *EquationData)
 {
     ErrorStruct LNsolvError;
 
-    if (val0_ptr == NULL || outpflag_ptr == NULL)
+    if (EquationData == NULL)
     {
-                //  = EXCEPTION(INVALID_ARGUMENT);
         LNsolvError = EXCEPTION(INVALID_ARGUMENT);
         return LNsolvError; /* возврат ошибки */
     }
 
-    if (iszero(a))
+    if (iszero(EquationData -> b))
         {
-            if (iszero(b))
+            if (iszero(EquationData -> c))
             {
-                *outpflag_ptr = INF_ROOTS; /* значение для вывода ответа "беск. кол-ва корней" */
+                (EquationData -> outpflag) = INF_ROOTS; /* значение для вывода ответа "беск. кол-ва корней" */
                 return LNsolvError; /* возврат ошибки */
             }
             else
             {
-                *outpflag_ptr = NO_ROOTS; /* значение для вывода ответа "нет корней"  */
+                (EquationData -> outpflag) = NO_ROOTS; /* значение для вывода ответа "нет корней"  */
                 return LNsolvError; /* возврат ошибки */
             }
         }
         else
         {
-            *outpflag_ptr = ONE_ROOT; /* значение для вывода ответа "есть 1 корень" */
-            *val0_ptr = (-b)/a;
+            (EquationData -> outpflag) = ONE_ROOT; /* значение для вывода ответа "есть 1 корень" */
+            (EquationData -> val1) = -(EquationData -> b)/(EquationData -> a);
             return LNsolvError; /* возврат ошибки */
         }
 }
 
-ErrorStruct SolveSquareEquation(double a, double b, double c, rootnum *outpflag_ptr, double *val0_ptr, double *val1_ptr)
+ErrorStruct SolveSquareEquation(TestData *EquationData)
 {
     ErrorStruct ErrInSQS;
-    if (val0_ptr == NULL || val1_ptr == NULL || outpflag_ptr == NULL)
+
+    if (EquationData == NULL)
     {
         ErrInSQS = EXCEPTION(INVALID_ARGUMENT);
         return ErrInSQS; /* возврат ошибки */
     }
-                 //data->b * data->b
+
+    double a = EquationData -> a;
+    double b = EquationData -> b;
+    double c = EquationData -> c;
+
     double discr = b*b - 4 * a * c;
-    // data->x1 = ...
-    *val0_ptr = (-b) / (2.0 * a);
-    *val1_ptr = sqrt(abs(discr)) / (2.0 * a);
+
+    EquationData -> val1 = (-b) / (2.0 * a);
+    EquationData -> val2 = sqrt(abs(discr)) / (2.0 * a);
 
     if (iszero(discr))
     {
-        *outpflag_ptr = ONE_ROOT; /* значение для вывода ответа "есть 1 действ. корень" */
+        EquationData -> outpflag = ONE_ROOT; /* значение для вывода ответа "есть 1 действ. корень" */
     }
     else if ( discr > 0 )
     {
-        *outpflag_ptr = TWO_ROOTS; /* значение для вывода ответа "есть 2 действ. корня" */
+        EquationData -> outpflag = TWO_ROOTS; /* значение для вывода ответа "есть 2 действ. корня" */
     }
     else
     {
-        *outpflag_ptr = TWO_COMPLEX_ROOTS; /* значение для вывода ответа "есть 2 комплексных корня" */
+        EquationData -> outpflag = TWO_COMPLEX_ROOTS; /* значение для вывода ответа "есть 2 комплексных корня" */
     }
     return ErrInSQS; /* возврат ошибки */
 
 }
 
-void Output(double *val0_ptr, double *val1_ptr, rootnum outpflag_ptr, int prec)
+void Output(TestData *OutpData, int prec)
 {
-    switch(outpflag_ptr)
+    double val1 = OutpData -> val1;
+    double val2 = OutpData -> val2;
+    switch(OutpData -> outpflag)
     {
 
         case INF_ROOTS:         printf("infitely many solutions"); break;
         case NO_ROOTS:          printf("no solutions"); break;
-        case ONE_ROOT:          printf("solution is %.*lf", prec, *val0_ptr); break;
-        case TWO_ROOTS:         printf("solutions are %.*lf and %.*lf", prec, *val0_ptr + *val1_ptr,
-            prec, *val0_ptr - *val1_ptr); break;
+        case ONE_ROOT:          printf("solution is %.*lf", prec, val1); break;
+        case TWO_ROOTS:         printf("solutions are %.*lf and %.*lf", prec, val1 + val2,
+            prec, val1 - val2); break;
         case TWO_COMPLEX_ROOTS: printf("solutions are %.*lf+%.*lfi and %.*lf-%.*lfi",
-            prec, *val0_ptr, prec, *val1_ptr, prec, *val0_ptr, prec, *val1_ptr); break;
+            prec, val1, prec, val2, prec, val1, prec, val2); break;
         default:                printf("Output error");
     }
 }
@@ -198,28 +208,20 @@ rootnum Convertstringtoenum(char Enumstring[])
     return NO_ROOTS;
 }
 
-ErrorStruct TestOneEq(TestData *Tdat)
+ErrorStruct TestOneEq(TestData Tdat_ref)
 {
-
-    double val1 = 0, val2 = 0;
-    rootnum outpflag = NO_ROOTS;
 
     ErrorStruct ErrorInTester;
 
-    if (Tdat == NULL)
-    {
-        ErrorInTester = EXCEPTION(INVALID_ARGUMENT);
-        return ErrorInTester; /* возврат ошибки */
-    }
+    TestData Tdat_out {.a = Tdat_ref.a, .b = Tdat_ref.b, .c = Tdat_ref.c, .val1 = 0, .val2 = 0, .outpflag = NO_ROOTS};
 
 
-    SolveEquation(Tdat -> a, Tdat -> b, Tdat -> c, &outpflag, &val1, &val2);
+    SolveEquation(&Tdat_out);
 
-
-    if ( !iszero(val1 - (Tdat -> val1)) || !iszero(val2 - (Tdat -> val2)) || !iszero(outpflag != (Tdat -> outpflag)) )
+    if ( !iszero(Tdat_ref.val1 - Tdat_out.val1) || !iszero(Tdat_ref.val2 - Tdat_out.val2) || !iszero(Tdat_ref.outpflag - Tdat_out.outpflag) )
     {
         printf(TO_RED "Test Failed!!!\n" TO_DEFAULT);
-        printf("Expected: val1 = %lf, val2 = %lf. Exected: val1 = %lf, val2 = %lf \n", Tdat -> val1, Tdat -> val2, val1, val2);
+        printf("Expected: val1 = %lf, val2 = %lf. Exected: val2 = %lf, val2 = %lf \n", Tdat_ref.val1, Tdat_ref.val2, Tdat_out.val1, Tdat_out.val2);
         return ErrorInTester; /* возврат не ошибки */
     }
     else
@@ -229,7 +231,7 @@ ErrorStruct TestOneEq(TestData *Tdat)
     }
 }
 
-ErrorStruct EquasionTester(char TestFileName[])
+ErrorStruct EquationTester(char TestFileName[])
 {
 
     ErrorStruct TesterError;
@@ -260,7 +262,8 @@ ErrorStruct EquasionTester(char TestFileName[])
 
         Tdata.outpflag = Convertstringtoenum(Enumstring);
 
-        TesterError = TestOneEq(&Tdata);
+        TesterError = TestOneEq(Tdata);
+        Tdata = {.a = 0, .b = 0, .c = 0, .val1 = 0, .val2 = 0, .outpflag = NO_ROOTS};
         ScansCnt = fscanf(file, "%lf %lf %lf %lf %lf %s", &(Tdata.a), &(Tdata.b), &(Tdata.c), &(Tdata.val1), &(Tdata.val2), Enumstring);
     }
 
@@ -269,16 +272,16 @@ ErrorStruct EquasionTester(char TestFileName[])
 
 ErrorStruct SolveStart()
 {
-    double a = 0, b = 0, c = 0, val0 = 0, val1 = 0;
-    rootnum outpflag;
+    TestData EquationData {.a = 0, .b = 0, .c = 0, .val1 = 0, .val2 = 0, .outpflag = NO_ROOTS};
     int prec = 1;
 
 
-    Input(&a, &b, &c);
+    Input(&EquationData);
     prec = PrecisionInput();
 
-                                    // struct
-    ErrorStruct Solvstarterr = SolveEquation(a, b, c, &outpflag, &val0, &val1);
+
+    // struct
+    ErrorStruct Solvstarterr = SolveEquation(&EquationData);
 
     /*
     if (ErrorStruct.ERROR != NOERROR)
@@ -287,7 +290,7 @@ ErrorStruct SolveStart()
     }
     */
 
-    Output(&val0, &val1, outpflag, prec);
+    Output(&EquationData, prec);
     return Solvstarterr; /* возврат ошибки */
 }
 
@@ -314,22 +317,12 @@ ErrorStruct CMDProcessing(int argc, char *argv[])
 
     inp = Arg_Identifier(argc, argv);
 
-    // вынести в отдельную ф-ию
-
-
-    /*
-    if (Errcode.Error != NOERROR)
-    {
-        return Errcode;
-    }
-    */
-
     switch(inp)
     {
         case SOLVETAR: Errcode = SolveStart(); break;
-        case HELPTAR: printf("Square equasion solver by Mihail Ilyushenkov @2023 v1.0.idkn\nEnter --test to run tests or other to solve your equasion"); break;
-        case TESTTAR: Errcode = EquasionTester(NULL); break;
-        case USTESTTAR:Errcode = EquasionTester(argv[2]); break;
+        case HELPTAR: printf("Square Equation solver by Mihail Ilyushenkov @2023 v1.0.idkn\nEnter --test to run tests or other to solve your Equation"); break;
+        case TESTTAR: Errcode = EquationTester(NULL); break;
+        case USTESTTAR:Errcode = EquationTester(argv[2]); break;
         default: printf("nu error i error (inp not found), che bubnit...."); break;
     }
 
