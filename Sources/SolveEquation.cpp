@@ -204,7 +204,7 @@ ErrorStruct CMDProcessing(int argc, char *argv[])
 {
     CHECK_ARGUMENT(argv)
 
-    ErrorStruct Errcode;
+    ErrorStruct Errcode {};
 
     progtarget inp = SOLVE_TARGET;
 

@@ -16,9 +16,9 @@
 ErrorStruct EquationTester(const char TestFileName[])
 {
 
-    ErrorStruct TesterError;
+    ErrorStruct TesterError {};
 
-    FILE *file;
+    FILE *file = NULL;
 
     if (TestFileName == NULL)
     {

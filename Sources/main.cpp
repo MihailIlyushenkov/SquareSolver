@@ -16,7 +16,7 @@
 
 int main(int argc, char *argv[])
 {
-    ErrorStruct MainError;
+    ErrorStruct MainError {};
 
     MainError = CMDProcessing(argc, argv);
 
