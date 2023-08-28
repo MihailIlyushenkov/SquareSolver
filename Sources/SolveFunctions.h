@@ -5,11 +5,19 @@
 \file
 \brief Заголовочный файл с описанием функций, структур и перечислений
 
-Данный файл содержит в себе определения основных функций, структур и перечислений, используемых в программе
+Данный файл содержит в себе определения основных функций, структур и перечислений, используемых в файле SolveFunctions.cpp
 */
 
+#define TO_RED "\033[31m"
+#define TO_DEFAULT "\033[0m"
+#define TO_GREEN "\033[32m"
 
 
+#define EXCEPTION(ERR_CODE) (ErrorStruct{.Error = ERR_CODE, .ErrorFileName = __FILE__, .ErrorLineNumber = __LINE__, .ErrorFuncName = __PRETTY_FUNCTION__})
+
+#define CHECK_ARGUMENT(PTR) if (PTR == NULL) { return EXCEPTION(INVALID_ARGUMENT); }
+
+#define CHECK_ERROR(ErrorStruct) if (ErrorStruct.Error != NO_ERROR) { return ErrorStruct; }
 
 /// Набор возможных параметров для функции Output()
 enum rootnum
@@ -18,21 +26,15 @@ enum rootnum
     NO_ROOTS, ///< Указывает, что ответ нужно вывести в формате "корней нет"
     ONE_ROOT, ///< Указывает, что ответ нужно вывести в формате "только 1 корень"
     TWO_ROOTS, ///< Указывает, что ответ нужно вывести в формате "2 действительных корня"
-    // TWO_COMPLEX_ROOTS
     TWO_COMPLEX_ROOTS ///< Указывает, что ответ нужно вывести в формате "2 копмлексных корня"
 };
 
 /*! Набор возможных кодов ошибок */
 enum errortype
 {
-    /// TODO: Разделить два разных слова через '_'
-    NOERROR = 0, ///< Указывает, что ошибки не выявлено
-    /// TODO: Удалить старые коментарии, относящиеся к старым правкам
-    //INVALID_ARGUMENT
+    NO_ERROR = 0, ///< Указывает, что ошибки не выявлено
     INVALID_ARGUMENT, ///< Указывает, что один из аргументов-указателей для функции был нулем
-    //FILE_NOT_OPEN
     FILE_NOT_OPEN, ///< Указывает, что файл для тестирования не был открыт
-    // ???
     BAD_TEST_DATA ///< Указывает, что в файле для тестирования были некорректные данные для тестов
 };
 
@@ -40,20 +42,17 @@ enum errortype
 enum progtarget
 {
     /// TODO: Исправить правки, которые я тут оставил
-    // SOLVE_TARGET
-    SOLVETAR = 0, ///<Указывает, что целью является решение уравнения, которое должен ввести пользователь
-    TESTTAR, ///< Указывает, что целью является прогонка тестов из дефолтного файла (Testdata.txt)
-    HELPTAR, ///< Указывает, что целью является вывод информации для помощи пользователю
-    USTESTTAR ///< Указывает, что целью является прогонка тестов кастомного файла (создается пользователем, адрес вводится в качестве аргумента командной строки после --test
+    SOLVE_TARGET = 0, ///<Указывает, что целью является решение уравнения, которое должен ввести пользователь
+    TEST_TARGET, ///< Указывает, что целью является прогонка тестов из дефолтного файла (EquationData.txt)
+    HELP_TARGET, ///< Указывает, что целью является вывод информации для помощи пользователю
+    USER_TEST_TARGET ///< Указывает, что целью является прогонка тестов кастомного файла (создается пользователем, адрес вводится в качестве аргумента командной строки после --test
 };
 
 /*!
-	\brief Струкрута, используемая функцией TestOneEQ для принятия параметров теста
+	\brief Струкрута, используемая функциями для принятия данных по уравнению
 */
 
-/// TODO: Исправить правку, которую я тут оставил. Данная структура используется не только для тестов
-// EquationData
-struct TestData
+struct EquationData
 {
     double a; ///< Отвечает за коэффицент а в уравнении
     double b; ///< Отвечает за коэффицент b в уравнении
@@ -69,7 +68,7 @@ struct TestData
 
 struct ErrorStruct
 {
-    errortype Error = NOERROR;
+    errortype Error = NO_ERROR;
     const char *ErrorFileName = NULL;
     int ErrorLineNumber = 0;
     const char *ErrorFuncName = NULL;
@@ -85,7 +84,7 @@ void ClearBuffer(void);
 \param[in] x сравниваемое число
 \return возвращаемое булевое значение. True, если |x| < EPS, иначае False
 */
-bool iszero(double x);
+bool IsZero(double x);
 
 /*!
 Вызывает SolveLinearEquation или SolveSquareEquation в зависимости от параметров a, b, c
@@ -95,7 +94,7 @@ bool iszero(double x);
 \param[out] val2 параметр val1 в структуре
 \return Структура с информацией об ошибках
 */
-ErrorStruct SolveEquation(TestData *EquasionData);
+ErrorStruct SolveEquation(EquationData *EquasionData);
 
 /*!
 Обрабатывает ввод из консоли. При неверных данных просит ввести их повторно. Также вызывает ClearBuffer()
@@ -105,7 +104,7 @@ ErrorStruct SolveEquation(TestData *EquasionData);
 \param[out] EquasionData->c коэффицент c
 \return Структура с информацией об ошибках
 */
-ErrorStruct Input(TestData *ReturnData);
+ErrorStruct Input(EquationData *ReturnData);
 
 /*!
 Решает линейное уравнение ax + b = 0
@@ -115,7 +114,7 @@ ErrorStruct Input(TestData *ReturnData);
 \param[out] EquasionData->outpflag служебное значение для вывода в функции Output()
 \return Структура с информацией об ошибках
 */
-ErrorStruct SolveLinearEquation(TestData *EquasionData);
+ErrorStruct SolveLinearEquation(EquationData *EquasionData);
 
 
 /*!
@@ -126,7 +125,7 @@ ErrorStruct SolveLinearEquation(TestData *EquasionData);
 \param[out] EquasionData->outpflag записывает служебное значение для вывода в функции Output()
 \return Структура с информацией об ошибках
 */
-ErrorStruct SolveSquareEquation(TestData *EquasionData);
+ErrorStruct SolveSquareEquation(EquationData *EquasionData);
 
 
 /*!
@@ -134,7 +133,7 @@ ErrorStruct SolveSquareEquation(TestData *EquasionData);
 \param[in] OutpData структура с данными решенного уравнения
 \param[in] prec количество знаков после запятой при выводе ответа
 */
-void Output(TestData *OutpData, int prec);
+ErrorStruct Output(const EquationData *OutpData, int prec);
 
 
 /*!
@@ -144,28 +143,7 @@ void Output(TestData *OutpData, int prec);
 int PrecisionInput();
 
 
-/*!
-Вызыывает функцию TestOneEq количество TestCounter раз и передает ей данные, из файла, введенного пользователем.
-Если таковой не указан, то будет открыт файл Testdata.txt
-\param[in] Testfilename имя файла с тестами
-\return Структура с информацией об ошибках
-*/
-ErrorStruct EquationTester(char Testfilename[]);
 
-
-ErrorStruct TestOneEq(TestData Tdat);
-/*!
-Тестирует програму решения уравнения
-\param[in] TestData Структура, содержащая коэффиценты уравнения и эталонные решения для них
-\return Структура с информацией об ошибках
-*/
-
-/*!
-конвертирует строку в заранее заданный enum (rootnum)
-\param[in] строка для конвертации
-\return enum rootnum, если строка идентична одному из enum rootnum, иначе возвращает дефолтное значение NO_ROOTS
-*/
-rootnum Convertstringtoenum(char Enumstring[]);
 
 
 /*!
@@ -196,6 +174,6 @@ ErrorStruct SolveStart();
 \param[in] argv[] аргументы командной строки
 \return progtarget для дальнейшей обработки в CMDProcessing()
 */
-progtarget Arg_Identifier(int argc, char *argv[]);
+progtarget ArgIdentifier(int argc, char *argv[]);
 
 #endif /*MYFUNCTIONS_H*/
